@@ -1,9 +1,9 @@
 /*
  * ////////////////////////////////////////////////////////
- * // MATRIX ENGINEERING | 1337 ESA AGENT FRAMEWORK //
+ * // MATRIX ENGINEERING | 1337 ASBESTOS AGENT FRAMEWORK //
  * ////////////////////////////////////////////////////////
  * // Architecture:    Multi-Agentic System (A2A Network)
- * // Target:          EDR PDF Packages -> ASTM Rationale
+ * // Target:          PLM Data -> NESHAP Regulatory Rationale
  * // Security LeveL:  CLASSIFIED [M&A Portfolio Ready]
  * ////////////////////////////////////////////////////////
  * // MATRIX TEAMMATES: To hook into this framework, DO NOT
@@ -137,11 +137,11 @@ func main() {
 	// Load .env file if it exists
 	_ = godotenv.Load()
 	var (
-		payloadPath = flag.String("payload", "", "Path to raw EDR PDF suite or initialized project folder")
+		payloadPath = flag.String("payload", "", "Path to raw Laboratory PDF suite or initialized project folder")
 		projectID   = flag.String("project", os.Getenv("GCP_PROJECT"), "GCP Project ID for Vertex AI")
 		location    = flag.String("location", "us-central1", "GCP Location for Vertex AI")
 		skipHITL    = flag.Bool("skip-hitl", false, "1337 TOGGLE: Bypass HITL validation for fully automated runs")
-		skipASTM    = flag.Bool("skip-astm", false, "1337 TOGGLE: Omit the ASTM Synthesizer Agent from the A2A network")
+		skipNESHAP  = flag.Bool("skip-neshap", false, "1337 TOGGLE: Omit the NESHAP Synthesizer Agent from the A2A network")
 	)
 	flag.Parse()
 
@@ -163,38 +163,33 @@ func main() {
 	}
 
 	parserCfg := core.AgentConfig{
-		Name:         "ParserAgent",
+		Name:         "LabParserAgent",
 		Model:        "gemini-2.5-flash",
-		SystemPrompt: loadSkill(".agents/skills/parser/SKILL.md"),
+		SystemPrompt: loadSkill(".agents/skills/lab-parser/SKILL.md"),
 		Temperature:  0.0,
 	}
 
-	geoCfg := core.AgentConfig{
-		Name:         "GeospatialEvaluatorAgent",
+	assessorCfg := core.AgentConfig{
+		Name:         "MaterialAssessorAgent",
 		Model:        "gemini-2.5-flash",
-		SystemPrompt: loadSkill(".agents/skills/geospatial-evaluator/SKILL.md"),
+		SystemPrompt: loadSkill(".agents/skills/material-assessor/SKILL.md"),
 		Temperature:  0.1,
 	}
 
-	astmCfg := core.AgentConfig{
-		Name:         "ASTMSynthesizerAgent",
-		Model:        "gemini-2.5-flash", // We use flash to avoid model/quota issues
-		SystemPrompt: loadSkill(".agents/skills/astm-synthesizer/SKILL.md"),
-		Temperature:  0.2,
+	neshapCfg := core.AgentConfig{
+		Name:         "NESHAPSynthesizerAgent",
+		Model:        "gemini-2.5-pro",
+		SystemPrompt: loadSkill(".agents/skills/neshap-synthesizer/SKILL.md"),
+		Temperature:  0.1, // NESHAP requires strict logic
 	}
 
 	templateCfg := core.AgentConfig{
-		Name:         "TemplateCompilerAgent",
+		Name:         "AsbestosTemplateCompilerAgent",
 		Model:        "gemini-2.5-flash",
-		SystemPrompt: loadSkill(".agents/skills/template-compiler/SKILL.md"),
+		SystemPrompt: loadSkill(".agents/skills/asbestos-template-compiler/SKILL.md"),
 		Temperature:  0.2,
 	}
-	siteReconCfg := core.AgentConfig{
-		Name:         "SiteReconSynthesizerAgent",
-		Model:        "gemini-2.5-pro",
-		SystemPrompt: loadSkill(".agents/skills/site-recon-synthesizer/SKILL.md"),
-		Temperature:  0.2,
-	}
+
 	// 1.5 Inject Historical Reports into Template Compiler Context
 	historicalDir := filepath.Join(*payloadPath, "historical")
 	if hFiles, err := os.ReadDir(historicalDir); err == nil {
@@ -230,15 +225,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	gAgent, err := core.NewAgent(ctx, *projectID, *location, geoCfg)
+	aAgent, err := core.NewAgent(ctx, *projectID, *location, assessorCfg)
 	if err != nil {
-		slog.Error("SYSTEM_FAULT: Geo Init Failed", "err", err)
+		slog.Error("SYSTEM_FAULT: Assessor Init Failed", "err", err)
 		os.Exit(1)
 	}
 
-	aAgent, err := core.NewAgent(ctx, *projectID, *location, astmCfg)
+	nAgent, err := core.NewAgent(ctx, *projectID, *location, neshapCfg)
 	if err != nil {
-		slog.Error("SYSTEM_FAULT: ASTM Init Failed", "err", err)
+		slog.Error("SYSTEM_FAULT: NESHAP Synthesizer Init Failed", "err", err)
 		os.Exit(1)
 	}
 
@@ -247,16 +242,11 @@ func main() {
 		slog.Error("SYSTEM_FAULT: Template Init Failed", "err", err)
 		os.Exit(1)
 	}
-	srAgent, err := core.NewAgent(ctx, *projectID, *location, siteReconCfg)
-	if err != nil {
-		slog.Error("SYSTEM_FAULT: Site Recon Init Failed", "err", err)
-		os.Exit(1)
-	}
+
 	// 3. Assemble SequentialAgent Pipeline (1337 A2A Network Matrix)
-	activeAgents := []*core.Agent{gAgent} // Note: pAgent logic runs separately to extract initial flow.
-	activeAgents = append(activeAgents, srAgent)
-	if !*skipASTM {
-		activeAgents = append(activeAgents, aAgent)
+	activeAgents := []*core.Agent{aAgent} // Note: pAgent logic runs separately to extract initial flow.
+	if !*skipNESHAP {
+		activeAgents = append(activeAgents, nAgent)
 	}
 	activeAgents = append(activeAgents, tAgent)
 
@@ -280,7 +270,7 @@ func main() {
 		}
 
 		// Save the final payload to a file inside output/
-		jsonPath := *payloadPath + "\\output\\MATRIX_ESA_REPORT.json"
+		jsonPath := *payloadPath + "\\output\\MATRIX_ASBESTOS_REPORT.json"
 		err = os.WriteFile(jsonPath, []byte(finalPayload), 0644)
 		if err != nil {
 			slog.Error("SYSTEM_FAULT: Failed to write output report to disk", "err", err)
@@ -289,7 +279,7 @@ func main() {
 
 			// Automatically find the new Blank Template in the knowledge/ folder
 			knowledgeDir := *payloadPath + "\\knowledge"
-			templatePath := knowledgeDir + "\\ESA_PHASE_I_Template.docx" // Target the new template
+			templatePath := knowledgeDir + "\\Matrix_Asbestos_Blank_Template.docx" // Target the new template
 			finalDocxPath := *payloadPath + "\\output\\FINAL_DRAFT_REPORT.docx"
 
 			slog.Info("/// INITIATING DOCX MERGE ///", "template", templatePath)
