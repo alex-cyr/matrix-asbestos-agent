@@ -9,13 +9,13 @@ import (
 )
 
 // Pipeline enforces the SequentialAgent pattern.
-// 1337 A2A NETWORK MATRIX: Core orchestrator for multi-agentic document processing.
+// Multi-Agent Microservice Pipeline: Core orchestrator for multi-agentic document processing.
 type Pipeline struct {
 	Agents    []*Agent
 	Memory    []*Artifact
 	ProjectID string
 	Location  string
-	SkipHITL  bool // 1337 TOGGLE: Bypass manual UI review loops (for fully automated dev/testing)
+	SkipHITL  bool // System Override: Bypass manual UI review loops (for fully automated dev/testing)
 }
 
 func NewPipeline(project, location string, skipHITL bool, agents ...*Agent) *Pipeline {
@@ -30,22 +30,22 @@ func NewPipeline(project, location string, skipHITL bool, agents ...*Agent) *Pip
 
 // Run executes the chain sequentially, pausing on unapproved artifacts.
 func (p *Pipeline) Run(ctx context.Context, initialPayload string) (string, error) {
-	slog.Info("MATRIX EXECUTABLE LOADED: Initializing SequentialAgent Pipeline")
+	slog.Info("[INFO] System initialized: Enterprise Asbestos Pipeline: Initializing SequentialAgent Pipeline")
 
 	currentPayload := initialPayload
 	for i, agent := range p.Agents {
-		slog.Info("/// NODE ENGAGED ///", "name", agent.Cfg.Name, "sequence_step", i+1)
+		slog.Info("[INFO] Agent Node execution started", "name", agent.Cfg.Name, "sequence_step", i+1)
 
 		if i == 0 {
 			// Optimal Pacing: The Parser just shoved 13 full PDFs into the engine. We wait exactly 1 minute here
 			// so the Free-Tier TPM (Tokens-Per-Minute) bucket resets, then we blaze through the rest of the nodes instantly.
-			slog.Warn("/// OPTIMIZED PACING /// Pausing for 60s to let the Parser's massive Token-Load clear before downstream execution...")
+			slog.Warn("[WARN] Rate limit mitigation activated; pausing sequence to respect API quotas.
 			time.Sleep(60 * time.Second)
 		}
 
 		artifact, err := agent.Execute(ctx, genai.Text(currentPayload))
 		if err != nil {
-			return "", fmt.Errorf("SYSTEM FAULT: Pipeline shattered at matrix node %s: %w", agent.Cfg.Name, err)
+			return "", fmt.Errorf("SYSTEM FAULT: Pipeline execution failed at node %s: %w", agent.Cfg.Name, err)
 		}
 
 		p.Memory = append(p.Memory, artifact)
@@ -60,9 +60,9 @@ func (p *Pipeline) Run(ctx context.Context, initialPayload string) (string, erro
 					"artifact_id", artifact.ID,
 					"agent", agent.Cfg.Name)
 
-				// In production integration, the Antigravity IDE consumes this event and prompts the UI.
+				// In production integration, the Vahalo Frontend Dashboard consumes this event and prompts the UI.
 				// After manual approval (inline doc comments), the webhook calls the pipeline back.
-				return "", fmt.Errorf("SIG_YIELD: Entity Validation Required by HW [Artifact %s]", artifact.ID)
+				return "", fmt.Errorf("HITL (Human-In-The-Loop) Validation Pause: Entity Validation Required by Licensed Environmental Professional / QA Reviewer [Artifact %s]", artifact.ID)
 			}
 		}
 

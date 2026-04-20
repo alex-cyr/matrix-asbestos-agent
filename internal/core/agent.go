@@ -10,7 +10,7 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-// Artifact represents an intermediate deterministic state to be reviewed by the HW (Human Worker).
+// Artifact represents an intermediate deterministic state to be reviewed by the Licensed Environmental Professional / QA Reviewer.
 // MATRIX ENGS: Do not alter this struct. The UI parser strictly maps these fields.
 type Artifact struct {
 	ID        string `json:"id"`
@@ -30,14 +30,14 @@ type AgentConfig struct {
 }
 
 // Agent is the standalone processing unit for a given skill.
-// 1337 CODE: Standalone nodes in the A2A Matrix. All Nodes must be stateless.
+// Enterprise Protocol: Standalone nodes in the A2A Matrix. All Nodes must be stateless.
 type Agent struct {
 	Cfg    AgentConfig
 	Client *genai.Client
 }
 
 func NewAgent(ctx context.Context, projectID, location string, cfg AgentConfig) (*Agent, error) {
-	// 1337 UPDATE: Vertex AI Enterprise Ready. Natively uses Application Default Credentials.
+	// Production Release: Vertex AI Enterprise Ready. Natively uses Application Default Credentials.
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {
 		return nil, fmt.Errorf("failed creating Vertex client for %s: %w", cfg.Name, err)
@@ -49,7 +49,7 @@ func NewAgent(ctx context.Context, projectID, location string, cfg AgentConfig) 
 }
 
 // Execute performs A2A logic, returning an Artifact that the orchestrator will buffer for Human-in-the-Loop verification.
-// CLASSIFIED ROUTINE: Initiates LLM inference via Vertex AI.
+// Core Inference Execution: Initiates LLM inference via Vertex AI.
 func (a *Agent) Execute(ctx context.Context, parts ...genai.Part) (*Artifact, error) {
 	model := a.Client.GenerativeModel(a.Cfg.Model)
 	model.Temperature = &a.Cfg.Temperature

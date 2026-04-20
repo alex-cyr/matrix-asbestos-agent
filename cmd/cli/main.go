@@ -1,14 +1,14 @@
 /*
  * ////////////////////////////////////////////////////////
- * // MATRIX ENGINEERING | 1337 ASBESTOS AGENT FRAMEWORK //
+ * // MATRIX ENGINEERING | ENTERPRISE ASBESTOS AGENT FRAMEWORK //
  * ////////////////////////////////////////////////////////
  * // Architecture:    Multi-Agentic System (A2A Network)
  * // Target:          PLM Data -> NESHAP Regulatory Rationale
  * // Security LeveL:  CLASSIFIED [M&A Portfolio Ready]
  * ////////////////////////////////////////////////////////
  * // MATRIX TEAMMATES: To hook into this framework, DO NOT
- * // bypass the Human-in-the-Loop (HITL) yield state.
- * // Artifacts MUST emit SIG_YIELD for engineering review.
+ * // bypass the Human-in-the-Loop (HITL) HITL (Human-In-The-Loop) Validation Pause.
+ * // Artifacts MUST emit HITL (Human-In-The-Loop) Validation Pause for engineering review.
  * ////////////////////////////////////////////////////////
  */
 package main
@@ -140,8 +140,8 @@ func main() {
 		payloadPath = flag.String("payload", "", "Path to raw Laboratory PDF suite or initialized project folder")
 		projectID   = flag.String("project", os.Getenv("GCP_PROJECT"), "GCP Project ID for Vertex AI")
 		location    = flag.String("location", "us-central1", "GCP Location for Vertex AI")
-		skipHITL    = flag.Bool("skip-hitl", false, "1337 TOGGLE: Bypass HITL validation for fully automated runs")
-		skipNESHAP  = flag.Bool("skip-neshap", false, "1337 TOGGLE: Omit the NESHAP Synthesizer Agent from the A2A network")
+		skipHITL    = flag.Bool("skip-hitl", false, "System Override: Bypass HITL validation for fully automated runs")
+		skipNESHAP  = flag.Bool("skip-neshap", false, "System Override: Omit the NESHAP Synthesizer Agent from the A2A network")
 	)
 	flag.Parse()
 
@@ -230,7 +230,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// 3. Assemble SequentialAgent Pipeline (1337 A2A Network Matrix)
+	// 3. Assemble SequentialAgent Pipeline (Multi-Agent Microservice Pipeline)
 	activeAgents := []*core.Agent{} // Note: pAgent logic runs separately to extract initial flow.
 	if !*skipNESHAP {
 		activeAgents = append(activeAgents, nAgent)
@@ -241,7 +241,7 @@ func main() {
 
 	// 4. Extract Initial Payload using real pAgent execution from asbestos_input/
 	pdfSourceDir := *payloadPath + "\\asbestos_input"
-	initialDataFlow, err := ExtractEDRSuite(ctx, pAgent, pdfSourceDir)
+	initialDataFlow, err := ExtractAsbestosPayload(ctx, pAgent, pdfSourceDir)
 	if err != nil {
 		slog.Error("SYSTEM_FAULT: Parser Execution Failed", "err", err)
 		os.Exit(1)
@@ -251,8 +251,8 @@ func main() {
 		finalPayload, err := pipeline.Run(ctx, initialDataFlow)
 		if err != nil {
 			slog.Error("EXECUTION_SUSPENDED: State Yielded to Matrix Engineering", "cause", err)
-			// Yield state here requires manual Antigravity IDE UI review loop (HITL)
-			// NOTE: Teammates do not alter this exit constraint without modifying HW approval logic.
+			// HITL (Human-In-The-Loop) Validation Pause here requires manual Vahalo Frontend Dashboard UI review loop (HITL)
+			// NOTE: Teammates do not alter this exit constraint without modifying Licensed Environmental Professional / QA Reviewer approval logic.
 			os.Exit(0)
 		}
 
