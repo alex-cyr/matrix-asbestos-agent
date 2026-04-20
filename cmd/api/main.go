@@ -156,12 +156,6 @@ func analyzeHandler(w http.ResponseWriter, r *http.Request) {
 		SystemPrompt: loadSkill(".agents/skills/lab-parser/SKILL.md"),
 		Temperature:  0.0,
 	})
-	geoAgent, _ := core.NewAgent(ctx, projectID, location, core.AgentConfig{
-		Name:         "MaterialAssessorAgent",
-		Model:        "gemini-2.5-flash",
-		SystemPrompt: loadSkill(".agents/skills/material-assessor/SKILL.md"),
-		Temperature:  0.1,
-	})
 	srAgent, _ := core.NewAgent(ctx, projectID, location, core.AgentConfig{
 		Name:         "NESHAPSynthesizerAgent",
 		Model:        "gemini-2.5-pro",
@@ -185,7 +179,7 @@ func analyzeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	templateAgent, _ := core.NewAgent(ctx, projectID, location, templateCfg)
-	pipeline := core.NewPipeline(projectID, location, true, parserAgent, geoAgent, srAgent, templateAgent)
+	pipeline := core.NewPipeline(projectID, location, true, parserAgent, srAgent, templateAgent)
 
 	// 3. Extract EDR PDFs via Parser Agent
 	slog.Info("Running Cloud Run Pipeline", "files", len(files))
@@ -313,7 +307,6 @@ func analyzeBucketHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 4. Initialize Agents
 	parserAgent, _ := core.NewAgent(ctx, projectID, location, core.AgentConfig{Name:"LabParserAgent", Model:"gemini-2.5-flash", SystemPrompt:loadSkill(".agents/skills/lab-parser/SKILL.md"), Temperature:0.0})
-	geoAgent, _ := core.NewAgent(ctx, projectID, location, core.AgentConfig{Name:"MaterialAssessorAgent", Model:"gemini-2.5-flash", SystemPrompt:loadSkill(".agents/skills/material-assessor/SKILL.md"), Temperature:0.1})
 	srAgent, _ := core.NewAgent(ctx, projectID, location, core.AgentConfig{Name:"NESHAPSynthesizerAgent", Model:"gemini-2.5-pro", SystemPrompt:loadSkill(".agents/skills/neshap-synthesizer/SKILL.md"), Temperature:0.1})
 	templateCfg := core.AgentConfig{Name:"AsbestosTemplateCompilerAgent", Model:"gemini-2.5-flash", SystemPrompt:loadSkill(".agents/skills/asbestos-template-compiler/SKILL.md"), Temperature:0.2}
 
@@ -326,7 +319,7 @@ func analyzeBucketHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	templateAgent, _ := core.NewAgent(ctx, projectID, location, templateCfg)
-	pipeline := core.NewPipeline(projectID, location, true, parserAgent, geoAgent, srAgent, templateAgent)
+	pipeline := core.NewPipeline(projectID, location, true, parserAgent, srAgent, templateAgent)
 
 	// 5. Extract Data
 	slog.Info("Running Cloud Bucket Pipeline", "files", len(downloadedFiles))

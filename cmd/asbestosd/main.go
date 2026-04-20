@@ -169,13 +169,6 @@ func main() {
 		Temperature:  0.0,
 	}
 
-	assessorCfg := core.AgentConfig{
-		Name:         "MaterialAssessorAgent",
-		Model:        "gemini-2.5-flash",
-		SystemPrompt: loadSkill(".agents/skills/material-assessor/SKILL.md"),
-		Temperature:  0.1,
-	}
-
 	neshapCfg := core.AgentConfig{
 		Name:         "NESHAPSynthesizerAgent",
 		Model:        "gemini-2.5-pro",
@@ -225,12 +218,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	aAgent, err := core.NewAgent(ctx, *projectID, *location, assessorCfg)
-	if err != nil {
-		slog.Error("SYSTEM_FAULT: Assessor Init Failed", "err", err)
-		os.Exit(1)
-	}
-
 	nAgent, err := core.NewAgent(ctx, *projectID, *location, neshapCfg)
 	if err != nil {
 		slog.Error("SYSTEM_FAULT: NESHAP Synthesizer Init Failed", "err", err)
@@ -244,7 +231,7 @@ func main() {
 	}
 
 	// 3. Assemble SequentialAgent Pipeline (1337 A2A Network Matrix)
-	activeAgents := []*core.Agent{aAgent} // Note: pAgent logic runs separately to extract initial flow.
+	activeAgents := []*core.Agent{} // Note: pAgent logic runs separately to extract initial flow.
 	if !*skipNESHAP {
 		activeAgents = append(activeAgents, nAgent)
 	}
@@ -252,8 +239,8 @@ func main() {
 
 	pipeline := core.NewPipeline(*projectID, *location, *skipHITL, activeAgents...)
 
-	// 4. Extract Initial Payload using real pAgent execution from edr_source/
-	pdfSourceDir := *payloadPath + "\\edr_source"
+	// 4. Extract Initial Payload using real pAgent execution from asbestos_input/
+	pdfSourceDir := *payloadPath + "\\asbestos_input"
 	initialDataFlow, err := ExtractEDRSuite(ctx, pAgent, pdfSourceDir)
 	if err != nil {
 		slog.Error("SYSTEM_FAULT: Parser Execution Failed", "err", err)

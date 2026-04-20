@@ -3,7 +3,7 @@
 *.exe
 
 # Protect Sensitive Client M&A Data
-edr_source/*
-!edr_source/.gitkeep
+asbestos_input/*
+!asbestos_input/.gitkeep
 output/*
 !output/.gitkeep
